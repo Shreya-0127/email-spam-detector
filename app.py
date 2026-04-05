@@ -27,17 +27,6 @@ st.markdown("""
 model = pickle.load(open('spam_model.pkl', 'rb'))
 tfidf = pickle.load(open('tfidf_vectorizer.pkl', 'rb'))
 
-# Sidebar
-with st.sidebar:
-    st.image("https://img.icons8.com/color/96/000000/email.png")
-    st.title("About This App")
-    st.write("This Email Spam Detector uses Machine Learning to classify emails as Spam or Not Spam.")
-    st.markdown("---")
-    st.write("**Model:** Naive Bayes")
-    st.write("**Accuracy:** 97.48%")
-    st.write("**Dataset:** 5,572 emails")
-    st.markdown("---")
-    st.write("Built by **Shreya Shukla**")
 
 # Main title
 st.markdown('<p class="title">📧 Email Spam Detector</p>', unsafe_allow_html=True)
@@ -89,4 +78,5 @@ if st.button("🔍 Check Email", use_container_width=True):
 
 # Footer
 st.markdown("---")
-st.markdown("<center>Made with ❤️ by Shreya Shukla | ML Project 2026</center>", unsafe_allow_html=True)
+st.markdown("<center style='color:gray; font-size:14px;'>© 2026 Shreya Shukla | Email Spam Detector</center>", unsafe_allow_html=True)
+ 
