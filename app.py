@@ -18,8 +18,8 @@ st.markdown("""
                    padding: 15px; border-radius: 8px; font-size: 20px; font-weight: bold; }
     .result-ham { background-color: #e8f5e9; border-left: 6px solid #43a047;
                   padding: 15px; border-radius: 8px; font-size: 20px; font-weight: bold; }
-    .info-box { background-color: #e3f2fd; border-radius: 10px;
-                padding: 15px; margin-bottom: 20px; }
+    .info-box { background-color: #1a73e8; border-radius: 10px;
+            padding: 15px; margin-bottom: 20px; color: white; font-weight: 500; }
     </style>
 """, unsafe_allow_html=True)
 
