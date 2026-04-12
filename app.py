@@ -120,7 +120,7 @@ tfidf = pickle.load(open('tfidf_vectorizer.pkl', 'rb'))
 st.markdown("""
 <div class="hero">
     <p class="hero-title">📧 Email Spam Detector</p>
-    <p class="hero-tagline">Instantly detect if any email is spam or not — powered by Machine Learning</p>
+    <p class="hero-tagline">Instantly detect if any email is spam or not</p>
 </div>
 """, unsafe_allow_html=True)
 
