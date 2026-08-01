@@ -33,15 +33,19 @@ model, vectorizer = load_assets()
 SPAM_EXAMPLE = "CONGRATULATIONS! You've been selected to win a $1,000 Walmart Gift Card. Click here immediately to claim your reward before it expires: http://bit.ly/claim-now-free"
 SAFE_EXAMPLE = "Hi Team,\n\nPlease find attached the agenda for tomorrow's strategy alignment call at 10:00 AM. Let me know if you have any questions or items to add to the deck.\n\nBest regards,\nAlex"
 
-# State management for preset insertions
+# State management for text input and auto-run trigger
 if "email_input" not in st.session_state:
     st.session_state.email_input = ""
+if "trigger_check" not in st.session_state:
+    st.session_state.trigger_check = False
 
 def set_spam_example():
     st.session_state.email_input = SPAM_EXAMPLE
+    st.session_state.trigger_check = True
 
 def set_safe_example():
     st.session_state.email_input = SAFE_EXAMPLE
+    st.session_state.trigger_check = True
 
 # -----------------------------------------------------------------------------
 # ADAPTIVE CSS DESIGN SYSTEM (LIGHT & DARK MODE SUPPORT)
@@ -218,7 +222,7 @@ st.markdown(
 )
 
 # -----------------------------------------------------------------------------
-# EXAMPLE BUTTONS (INSTANT ON_CLICK CALLBACKS)
+# EXAMPLE BUTTONS (FILLS TEXT AND TRIGGERS CLASSIFICATION INSTANTLY)
 # -----------------------------------------------------------------------------
 col1, col2 = st.columns(2)
 
@@ -254,7 +258,11 @@ st.markdown(
 # -----------------------------------------------------------------------------
 check_clicked = st.button("Check Email", key="check_btn", use_container_width=True)
 
-if check_clicked:
+# Run classification if 'Check Email' clicked OR an Example button was clicked
+if check_clicked or st.session_state.trigger_check:
+    # Reset auto-trigger flag
+    st.session_state.trigger_check = False
+    
     if not email_text.strip():
         st.warning("Please enter or paste an email message to analyze.")
     elif model is None or vectorizer is None:
