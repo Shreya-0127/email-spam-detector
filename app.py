@@ -33,225 +33,167 @@ model, vectorizer = load_assets()
 SPAM_EXAMPLE = "CONGRATULATIONS! You've been selected to win a $1,000 Walmart Gift Card. Click here immediately to claim your reward before it expires: http://bit.ly/claim-now-free"
 SAFE_EXAMPLE = "Hi Team,\n\nPlease find attached the agenda for tomorrow's strategy alignment call at 10:00 AM. Let me know if you have any questions or items to add to the deck.\n\nBest regards,\nAlex"
 
-# Session state initialization for text area input
+# State management for preset insertions
 if "email_input" not in st.session_state:
     st.session_state.email_input = ""
 
+def set_spam_example():
+    st.session_state.email_input = SPAM_EXAMPLE
+
+def set_safe_example():
+    st.session_state.email_input = SAFE_EXAMPLE
+
 # -----------------------------------------------------------------------------
-# CUSTOM CSS DESIGN SYSTEM (DARK BLUE SLATE PALETTE)
+# ADAPTIVE CSS DESIGN SYSTEM (LIGHT & DARK MODE SUPPORT)
 # -----------------------------------------------------------------------------
 st.markdown(
     """
     <style>
-    /* Google Fonts Import */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-    /* CSS Reset & Dark Mode Enforcement */
-    html, body, [data-testid="stAppViewContainer"], .stApp {
+    html, body, [class*="css"] {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-        background-color: #0B1120 !important;
-        color: #F8FAFC !important;
     }
 
-    /* Hide Default Header & Menu Overlays */
-    header, [data-testid="stHeader"] {
-        background-color: transparent !important;
-    }
-
-    /* Main Container Constraint (Centered, Max ~700px) */
+    /* Main Container Constraint */
     .main .block-container {
-        max-width: 720px !important;
-        padding-top: 3rem !important;
-        padding-bottom: 3rem !important;
-        padding-left: 1.25rem !important;
-        padding-right: 1.25rem !important;
+        max-width: 700px !important;
+        padding-top: 2rem !important;
+        padding-bottom: 2.5rem !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
     }
 
     /* Header Styling */
     .app-title {
-        font-size: 32px !important;
+        font-size: 30px !important;
         font-weight: 700 !important;
-        color: #F8FAFC !important;
-        margin-bottom: 6px !important;
+        margin-bottom: 4px !important;
         letter-spacing: -0.5px;
         line-height: 1.2;
     }
     .app-subtitle {
         font-size: 15px !important;
         font-weight: 400 !important;
-        color: #94A3B8 !important;
-        margin-bottom: 24px !important;
+        opacity: 0.7;
+        margin-bottom: 20px !important;
     }
 
-    /* Model Accuracy Card */
+    /* Model Accuracy Display Card */
     .accuracy-card {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        background-color: #1E293B;
-        border: 1px solid #334155;
-        border-radius: 12px;
-        padding: 16px 20px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-        margin-bottom: 24px;
+        background-color: rgba(125, 140, 160, 0.08);
+        border: 1px solid rgba(125, 140, 160, 0.2);
+        border-radius: 10px;
+        padding: 14px 18px;
+        margin-bottom: 20px;
     }
     .accuracy-label {
         font-size: 13px;
         font-weight: 600;
-        color: #94A3B8;
+        opacity: 0.8;
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
     .accuracy-value {
-        font-size: 20px;
+        font-size: 18px;
         font-weight: 700;
-        color: #60A5FA;
+        color: #2563EB;
     }
 
-    /* Example Buttons */
-    .stButton>button {
-        width: 100%;
-        background-color: #1E293B !important;
-        color: #E2E8F0 !important;
-        border: 1px solid #334155 !important;
+    /* Text Area Tweaks */
+    .stTextArea textarea {
         border-radius: 8px !important;
-        padding: 10px 16px !important;
+        font-size: 15px !important;
+        padding: 12px !important;
+    }
+
+    /* General Button Tweaks */
+    .stButton>button {
+        border-radius: 8px !important;
         font-size: 14px !important;
         font-weight: 500 !important;
-        transition: all 0.2s ease !important;
-    }
-    .stButton>button:hover {
-        background-color: #334155 !important;
-        border-color: #64748B !important;
-        color: #FFFFFF !important;
-    }
-
-    /* Streamlit Text Area Customization */
-    .stTextArea textarea {
-        background-color: #0F172A !important;
-        border: 1.5px solid #334155 !important;
-        border-radius: 10px !important;
-        color: #F8FAFC !important;
-        font-size: 15px !important;
-        padding: 14px !important;
-        transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-    .stTextArea textarea:focus {
-        border-color: #3B82F6 !important;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
-    }
-    .stTextArea textarea::placeholder {
-        color: #64748B !important;
+        transition: all 0.15s ease !important;
     }
 
     /* Primary Check Button Override */
     div.element-container:has(button[key="check_btn"]) button {
-        background-color: #3B82F6 !important;
+        background-color: #2563EB !important;
         color: #FFFFFF !important;
         border: none !important;
         border-radius: 8px !important;
-        padding: 14px 20px !important;
+        padding: 12px 20px !important;
         font-size: 16px !important;
         font-weight: 600 !important;
-        box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3) !important;
-        transition: background-color 0.2s ease, box-shadow 0.2s ease !important;
+        margin-top: 4px;
     }
     div.element-container:has(button[key="check_btn"]) button:hover {
-        background-color: #2563EB !important;
-        box-shadow: 0 6px 18px rgba(37, 99, 235, 0.4) !important;
+        background-color: #1D4ED8 !important;
         color: #FFFFFF !important;
     }
 
     /* Character Counter */
     .char-counter {
         font-size: 13px;
-        color: #94A3B8;
+        opacity: 0.7;
         text-align: right;
         margin-top: -12px;
-        margin-bottom: 20px;
+        margin-bottom: 16px;
     }
 
-    /* Result Cards */
+    /* Adaptive Result Cards */
     .result-card {
-        border-radius: 12px;
-        padding: 20px 24px;
-        margin-top: 24px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        border-radius: 10px;
+        padding: 18px 20px;
+        margin-top: 20px;
     }
     .result-spam {
-        background-color: rgba(239, 68, 68, 0.1);
+        background-color: rgba(239, 68, 68, 0.12);
         border: 1px solid rgba(239, 68, 68, 0.4);
     }
     .result-safe {
-        background-color: rgba(34, 197, 94, 0.1);
+        background-color: rgba(34, 197, 94, 0.12);
         border: 1px solid rgba(34, 197, 94, 0.4);
     }
     .result-header {
         font-size: 18px;
         font-weight: 700;
-        margin-bottom: 6px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    .result-spam .result-header {
-        color: #FCA5A5;
-    }
-    .result-safe .result-header {
-        color: #86EFAC;
+        margin-bottom: 4px;
     }
     .confidence-badge {
         font-size: 14px;
         font-weight: 600;
         margin-bottom: 8px;
     }
-    .result-spam .confidence-badge {
-        color: #F87171;
-    }
-    .result-safe .confidence-badge {
-        color: #4ADE80;
-    }
     .result-desc {
         font-size: 14px;
         line-height: 1.5;
-    }
-    .result-spam .result-desc {
-        color: #FECDD3;
-    }
-    .result-safe .result-desc {
-        color: #BBF7D0;
+        opacity: 0.9;
     }
 
-    /* Footer Styling */
+    /* Footer */
     .app-footer {
         text-align: center;
-        margin-top: 48px;
-        padding-top: 20px;
-        border-top: 1px solid #1E293B;
+        margin-top: 40px;
+        padding-top: 16px;
+        border-top: 1px solid rgba(125, 140, 160, 0.2);
         font-size: 13px;
-        color: #64748B;
-        line-height: 1.6;
+        opacity: 0.6;
+        line-height: 1.5;
     }
 
-    /* Mobile Responsiveness Rules */
+    /* Mobile Responsive Optimizations */
     @media (max-width: 640px) {
         .main .block-container {
-            padding-top: 1.5rem !important;
-            padding-left: 1rem !important;
-            padding-right: 1rem !important;
+            padding-top: 1rem !important;
         }
         .app-title {
             font-size: 24px !important;
         }
         .app-subtitle {
-            font-size: 14px !important;
-            margin-bottom: 16px !important;
-        }
-        .accuracy-card {
-            padding: 12px 16px;
-        }
-        .accuracy-value {
-            font-size: 18px;
+            font-size: 13px !important;
         }
     }
     </style>
@@ -265,7 +207,6 @@ st.markdown(
 st.markdown('<div class="app-title">📧 Email Spam Detector</div>', unsafe_allow_html=True)
 st.markdown('<div class="app-subtitle">Machine Learning Based Email Classification</div>', unsafe_allow_html=True)
 
-# Model Accuracy Display Card
 st.markdown(
     """
     <div class="accuracy-card">
@@ -277,17 +218,15 @@ st.markdown(
 )
 
 # -----------------------------------------------------------------------------
-# EXAMPLE BUTTONS
+# EXAMPLE BUTTONS (INSTANT ON_CLICK CALLBACKS)
 # -----------------------------------------------------------------------------
 col1, col2 = st.columns(2)
 
 with col1:
-    if st.button("Spam Example", use_container_width=True):
-        st.session_state.email_input = SPAM_EXAMPLE
+    st.button("Spam Example", on_click=set_spam_example, use_container_width=True)
 
 with col2:
-    if st.button("Safe Example", use_container_width=True):
-        st.session_state.email_input = SAFE_EXAMPLE
+    st.button("Safe Example", on_click=set_safe_example, use_container_width=True)
 
 # -----------------------------------------------------------------------------
 # INPUT TEXTAREA & METRICS
@@ -301,7 +240,7 @@ email_text = st.text_area(
     key="email_input_area",
 )
 
-# Keep internal state synchronized
+# Sync state
 st.session_state.email_input = email_text
 
 char_count = len(email_text)
@@ -322,10 +261,7 @@ if check_clicked:
         st.error("Model or vectorizer assets are missing. Please check your .pkl files.")
     else:
         with st.spinner("Analyzing Email..."):
-            # Feature extraction
             transformed_input = vectorizer.transform([email_text])
-            
-            # Predict class and probability
             prediction = model.predict(transformed_input)[0]
             
             if hasattr(model, "predict_proba"):
@@ -334,7 +270,6 @@ if check_clicked:
             else:
                 confidence = 100.0
 
-        # Display formatted output cards based on prediction outcome
         if prediction == 1 or str(prediction).lower() == "spam":
             st.markdown(
                 f"""
