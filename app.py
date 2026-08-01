@@ -1,5 +1,5 @@
-import streamlit as st
 import pickle
+import streamlit as st
 
 # -----------------------------------------------------------------------------
 # PAGE CONFIGURATION
@@ -12,166 +12,116 @@ st.set_page_config(
 )
 
 # -----------------------------------------------------------------------------
-# ADAPTIVE & MOBILE-OPTIMIZED CSS
+# DEEP STREAMLIT DOM CSS OVERRIDES (FORCED MOBILE OPTIMIZATION)
 # -----------------------------------------------------------------------------
 st.markdown(
     """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-/* Global Font & Reset */
-html, body, [class*="css"] {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+/* 1. FORCE REMOVE STREAMLIT DEFAULT MOBILE PADDING */
+div[data-testid="stAppViewContainer"] > section {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
 }
 
-/* Centered Container Constraints with Mobile Spacing */
-.main .block-container {
-    max-width: 680px !important;
-    padding-top: 1.75rem !important;
+div[data-testid="stMainBlockContainer"] {
+    padding-top: 1.5rem !important;
     padding-bottom: 2rem !important;
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+    max-width: 600px !important;
 }
 
-/* Header Styling */
-.hero {
-    border-bottom: 1px solid rgba(125, 140, 160, 0.2);
-    padding-bottom: 1rem;
-    margin-bottom: 1.25rem;
+/* 2. PREVENT IOS AUTO-ZOOM & MAKE INPUT TOUCH-FRIENDLY */
+div[data-testid="stTextArea"] textarea {
+    font-size: 16px !important; /* Mandatory to stop iOS safari zoom on focus */
+    border-radius: 12px !important;
+    padding: 14px !important;
+    line-height: 1.4 !important;
 }
+
+/* 3. MOBILE-OPTIMIZED TOUCH BUTTONS (MIN 48PX HEIGHT) */
+div[data-testid="stButton"] button {
+    min-height: 48px !important;
+    border-radius: 10px !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    touch-action: manipulation;
+}
+
+/* 4. PRIMARY CHECK BUTTON - STYLED DIRECTLY */
+div[data-testid="stVerticalBlock"] > div:has(button[key="check_btn"]) button,
+div[data-testid="stButton"]:last-of-type button {
+    background-color: #1C2E4A !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    font-size: 1.05rem !important;
+    margin-top: 0.5rem !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* 5. HEADER & INFO CARD MOBILE FIXES */
 .hero-title {
-    font-size: 1.75rem;
+    font-size: 1.6rem !important;
     font-weight: 700;
     margin: 0;
-    letter-spacing: -0.02em;
     line-height: 1.2;
 }
-.hero-tagline {
-    font-size: 0.9rem;
+.hero-subtitle {
+    font-size: 0.875rem;
     opacity: 0.75;
-    margin-top: 0.35rem;
-    margin-bottom: 0;
+    margin-top: 0.25rem;
+    margin-bottom: 1rem;
 }
 
-/* Metric / Info Badge */
-.info-box {
+.info-card {
     display: flex;
     justify-content: space-between;
     align-items: center;
     background-color: rgba(125, 140, 160, 0.08);
     border: 1px solid rgba(125, 140, 160, 0.18);
     border-radius: 10px;
-    padding: 12px 16px;
-    margin-bottom: 1.25rem;
-    font-size: 0.875rem;
-    font-weight: 500;
+    padding: 10px 14px;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
 }
 
-/* General Button Tweaks */
-.stButton > button {
-    border-radius: 8px !important;
-    border: 1px solid rgba(125, 140, 160, 0.25) !important;
-    font-weight: 500 !important;
-    font-size: 0.875rem !important;
-    padding: 0.6rem 1rem !important;
-    transition: all 0.15s ease !important;
-    width: 100%;
+/* 6. ADAPTIVE RESULT CARDS */
+.result-box {
+    border-radius: 12px;
+    padding: 1.1rem;
+    text-align: center;
+    margin-top: 1.25rem;
 }
-
-/* Primary Check Button */
-div[data-testid="stButton"]:last-of-type > button {
-    background-color: #1C2E4A !important;
-    color: #FFFFFF !important;
-    border: none !important;
-    font-size: 1rem !important;
-    padding: 0.8rem !important;
-    border-radius: 10px !important;
-    font-weight: 600 !important;
-    margin-top: 0.25rem;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-}
-
-div[data-testid="stButton"]:last-of-type > button:hover {
-    background-color: #0F1A2B !important;
-    color: #FFFFFF !important;
-}
-
-/* Result Cards - Adaptive to Theme */
 .result-spam {
     background-color: rgba(239, 68, 68, 0.12);
     border: 1px solid rgba(239, 68, 68, 0.35);
-    border-radius: 12px;
-    padding: 1.1rem 1.25rem;
-    text-align: center;
-    margin-top: 1.25rem;
-    font-size: 1.15rem;
-    font-weight: 700;
-    letter-spacing: 0.2px;
 }
 .result-ham {
     background-color: rgba(34, 197, 94, 0.12);
     border: 1px solid rgba(34, 197, 94, 0.35);
-    border-radius: 12px;
-    padding: 1.1rem 1.25rem;
-    text-align: center;
-    margin-top: 1.25rem;
+}
+.result-heading {
     font-size: 1.15rem;
     font-weight: 700;
-    letter-spacing: 0.2px;
+    margin-bottom: 0.25rem;
 }
-.result-sub {
+.result-details {
     font-size: 0.85rem;
-    font-weight: 400;
-    margin-top: 0.35rem;
     opacity: 0.85;
 }
 
-/* Input Area Improvements */
-.stTextArea textarea {
-    border-radius: 10px !important;
-    font-size: 0.95rem !important;
-    padding: 12px !important;
-}
-
-/* Footer Styling */
+/* 7. FOOTER */
 .footer {
     text-align: center;
-    font-size: 0.8rem;
-    opacity: 0.65;
+    font-size: 0.78rem;
+    opacity: 0.6;
     margin-top: 2.5rem;
     padding-top: 1rem;
     border-top: 1px solid rgba(125, 140, 160, 0.2);
-    line-height: 1.5;
-}
-
-/* Mobile Screen Breakpoints (< 640px) */
-@media (max-width: 640px) {
-    .main .block-container {
-        padding-top: 1.25rem !important;
-        padding-left: 0.75rem !important;
-        padding-right: 0.75rem !important;
-    }
-    .hero {
-        padding-bottom: 0.85rem;
-        margin-bottom: 1rem;
-    }
-    .hero-title {
-        font-size: 1.45rem !important;
-    }
-    .hero-tagline {
-        font-size: 0.825rem !important;
-    }
-    .info-box {
-        padding: 10px 14px;
-        font-size: 0.825rem;
-    }
-    .stTextArea textarea {
-        font-size: 0.9rem !important;
-    }
-    .result-spam, .result-ham {
-        padding: 1rem;
-        font-size: 1.05rem;
-    }
 }
 </style>
 """,
@@ -179,26 +129,26 @@ div[data-testid="stButton"]:last-of-type > button:hover {
 )
 
 # -----------------------------------------------------------------------------
-# MODEL LOADING
+# MODEL LOADING & ORIGINAL LOGIC
 # -----------------------------------------------------------------------------
 model = pickle.load(open("spam_model.pkl", "rb"))
 tfidf = pickle.load(open("tfidf_vectorizer.pkl", "rb"))
 
-# ── HERO HEADER ──
+# ── HEADER ──
 st.markdown(
     """
-<div class="hero">
-    <p class="hero-title">📧 Email Spam Detector</p>
-    <p class="hero-tagline">Instantly detect if any email is spam or legitimate</p>
+<div>
+    <div class="hero-title">📧 Email Spam Detector</div>
+    <div class="hero-subtitle">Instantly detect if any email is spam or legitimate</div>
 </div>
 """,
     unsafe_allow_html=True,
 )
 
-# ── INFO BOX ──
+# ── METRIC BADGE ──
 st.markdown(
     """
-<div class="info-box">
+<div class="info-card">
     <span>💡 Model Accuracy</span>
     <span style="color: #2563EB; font-weight: 700;">97.48%</span>
 </div>
@@ -225,7 +175,7 @@ st.write("")
 email_input = st.text_area(
     "Enter Email Text Here:",
     value=st.session_state.get("email_text", ""),
-    height=170,
+    height=160,
     placeholder="Type or paste your email here...",
 )
 
@@ -243,9 +193,9 @@ if st.button("🔍 Check Email", use_container_width=True):
             confidence = round(proba[1] * 100, 1)
             st.markdown(
                 f"""
-            <div class="result-spam">
-                🚨 SPAM DETECTED
-                <div class="result-sub">Confidence: {confidence}% — This email looks like spam</div>
+            <div class="result-box result-spam">
+                <div class="result-heading">🚨 SPAM DETECTED</div>
+                <div class="result-details">Confidence: {confidence}% — This email looks like spam</div>
             </div>""",
                 unsafe_allow_html=True,
             )
@@ -253,9 +203,9 @@ if st.button("🔍 Check Email", use_container_width=True):
             confidence = round(proba[0] * 100, 1)
             st.markdown(
                 f"""
-            <div class="result-ham">
-                ✅ NOT SPAM
-                <div class="result-sub">Confidence: {confidence}% — This email looks safe</div>
+            <div class="result-box result-ham">
+                <div class="result-heading">✅ NOT SPAM</div>
+                <div class="result-details">Confidence: {confidence}% — This email looks safe</div>
             </div>""",
                 unsafe_allow_html=True,
             )
