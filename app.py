@@ -1,183 +1,175 @@
 import streamlit as st
 import pickle
 
-# Page config
 st.set_page_config(
     page_title="Email Spam Detector",
     page_icon="📧",
     layout="centered"
 )
 
-# CSS
+# ----------------- CSS -----------------
+
 st.markdown("""
 <style>
-/* Header hero */
-.hero {
-    background: linear-gradient(135deg, #2F4156 0%, #567C8D 100%);
-    padding: 2rem 1.5rem 1.5rem 1.5rem;
-    border-radius: 16px;
-    text-align: center;
-    margin-bottom: 1.5rem;
-}
-.hero-title {
-    font-size: 2.4rem;
-    font-weight: 800;
-    color: #FFFFFF;
-    margin: 0;
-    letter-spacing: -0.5px;
-}
-.hero-tagline {
-    font-size: 1rem;
-    color: #C8D9E6;
-    margin-top: 0.4rem;
-    margin-bottom: 0;
+
+.main{
+    background:#BDC4D4;
 }
 
-/* Info box */
-.info-box {
-    background: linear-gradient(135deg, #567C8D, #C8D9E6);
-    border-radius: 12px;
-    padding: 14px 18px;
-    margin-bottom: 1.2rem;
-    color: #FFFFFF;
-    font-size: 0.95rem;
-    font-weight: 500;
+/* Hide Streamlit menu */
+#MainMenu {visibility:hidden;}
+footer {visibility:hidden;}
+header {visibility:hidden;}
+
+.title{
+    text-align:center;
+    color:#0F1A2B;
+    font-size:2rem;
+    font-weight:700;
+    margin-bottom:0;
 }
 
-/* Example buttons */
-.stButton > button {
-    border-radius: 10px;
-    border: 2px solid #567C8D;
-    background-color: transparent;
-    color: #567C8D;
-    font-weight: 600;
-    transition: all 0.2s;
-    width: 100%;
-}
-.stButton > button:hover {
-    background-color: #567C8D;
-    color: white;
+.subtitle{
+    text-align:center;
+    color:#52677D;
+    margin-bottom:25px;
 }
 
-/* Check button */
-div[data-testid="stButton"]:last-of-type > button {
-    background: linear-gradient(135deg, #2F4156, #567C8D);
-    color: white;
-    border: none;
-    font-size: 1.1rem;
-    padding: 0.6rem;
-    border-radius: 12px;
-    font-weight: 700;
+.block{
+    background:#D1CFC9;
+    padding:22px;
+    border-radius:14px;
+    border:1px solid #52677D30;
 }
 
-/* Result cards - visible in both dark and light mode */
-.result-spam {
-    background: #c0392b;
-    border-radius: 14px;
-    padding: 1.2rem 1.5rem;
-    text-align: center;
-    margin-top: 1rem;
-    color: #FFFFFF !important;
-    font-size: 1.3rem;
-    font-weight: 800;
-    letter-spacing: 0.3px;
-}
-.result-ham {
-    background: #1e8449;
-    border-radius: 14px;
-    padding: 1.2rem 1.5rem;
-    text-align: center;
-    margin-top: 1rem;
-    color: #FFFFFF !important;
-    font-size: 1.3rem;
-    font-weight: 800;
-    letter-spacing: 0.3px;
-}
-.result-sub {
-    font-size: 0.9rem;
-    font-weight: 400;
-    margin-top: 0.3rem;
-    color: #f0f0f0;
+.stTextArea textarea{
+    border-radius:12px;
+    border:2px solid #52677D;
+    font-size:16px;
 }
 
-/* Footer */
-.footer {
-    text-align: center;
-    color: #567C8D;
-    font-size: 0.85rem;
-    margin-top: 2rem;
-    padding-top: 1rem;
-    border-top: 1px solid #C8D9E6;
+.stButton>button{
+    width:100%;
+    background:#1C2E4A;
+    color:white;
+    border:none;
+    border-radius:10px;
+    padding:12px;
+    font-size:17px;
+    font-weight:600;
 }
+
+.stButton>button:hover{
+    background:#0F1A2B;
+    color:white;
+}
+
+.result-safe{
+    background:#E8F5EC;
+    border-left:6px solid #2E8B57;
+    padding:18px;
+    border-radius:10px;
+    margin-top:15px;
+}
+
+.result-spam{
+    background:#FCEAEA;
+    border-left:6px solid #C0392B;
+    padding:18px;
+    border-radius:10px;
+    margin-top:15px;
+}
+
+.footer{
+    text-align:center;
+    color:#52677D;
+    font-size:13px;
+    margin-top:40px;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
-# Load model
-model = pickle.load(open('spam_model.pkl', 'rb'))
-tfidf = pickle.load(open('tfidf_vectorizer.pkl', 'rb'))
+# ----------------- Load Model -----------------
 
-# ── HERO HEADER ──
-st.markdown("""
-<div class="hero">
-    <p class="hero-title">📧 Email Spam Detector</p>
-    <p class="hero-tagline">Instantly detect if any email is spam or not</p>
-</div>
-""", unsafe_allow_html=True)
+model = pickle.load(open("spam_model.pkl","rb"))
+tfidf = pickle.load(open("tfidf_vectorizer.pkl","rb"))
 
-# ── INFO BOX ──
-st.markdown("""
-<div class="info-box">
-    💡 Our AI model analyzes email content and predicts spam with <b>97.48% accuracy</b>
-</div>
-""", unsafe_allow_html=True)
+# ----------------- Header -----------------
 
-# ── EXAMPLE BUTTONS ──
-st.write("**Try an example:**")
-col1, col2 = st.columns(2)
-with col1:
-    if st.button("🚨 Spam Example"):
-        st.session_state.email_text = "Congratulations! You won a free iPhone. Click now to claim your prize worth $1000!"
-with col2:
-    if st.button("✅ Normal Example"):
-        st.session_state.email_text = "Hey, are we still meeting for lunch tomorrow at 1pm?"
+st.markdown("<h1 class='title'>📧 Email Spam Detector</h1>",unsafe_allow_html=True)
+st.markdown("<p class='subtitle'>Machine Learning Based Email Classification</p>",unsafe_allow_html=True)
 
-# ── TEXT INPUT ──
-st.write("")
-email_input = st.text_area(
-    "Enter Email Text Here:",
-    value=st.session_state.get('email_text', ''),
+# ----------------- Card -----------------
+
+st.markdown("<div class='block'>",unsafe_allow_html=True)
+
+email = st.text_area(
+    "Paste Email",
     height=180,
-    placeholder="Type or paste your email here..."
+    placeholder="Paste your email content here..."
 )
 
-# ── CHECK BUTTON ──
-st.write("")
-if st.button("🔍 Check Email", use_container_width=True):
-    if email_input.strip() == "":
-        st.warning("⚠️ Please enter some email text first!")
-    else:
-        vectorized = tfidf.transform([email_input])
-        prediction = model.predict(vectorized)[0]
-        proba = model.predict_proba(vectorized)[0]
+col1,col2 = st.columns(2)
 
-        if prediction == 1:
-            confidence = round(proba[1] * 100, 1)
+with col1:
+    if st.button("Spam Example"):
+        st.session_state.example="Congratulations! You have won $1000. Click here to claim."
+
+with col2:
+    if st.button("Safe Example"):
+        st.session_state.example="Hello, let's meet tomorrow at 10 AM regarding the project."
+
+if "example" in st.session_state:
+    email=st.session_state.example
+    st.text_area("Example Email",value=email,height=180)
+
+if st.button("Check Email"):
+
+    if email.strip()=="":
+
+        st.warning("Please enter an email.")
+
+    else:
+
+        vector=tfidf.transform([email])
+
+        prediction=model.predict(vector)[0]
+
+        probability=model.predict_proba(vector)[0]
+
+        if prediction==1:
+
+            confidence=round(probability[1]*100,2)
+
             st.markdown(f"""
             <div class="result-spam">
-                🚨 SPAM DETECTED
-                <div class="result-sub">Confidence: {confidence}% — This email looks like spam</div>
-            </div>""", unsafe_allow_html=True)
-        else:
-            confidence = round(proba[0] * 100, 1)
-            st.markdown(f"""
-            <div class="result-ham">
-                ✅ NOT SPAM
-                <div class="result-sub">Confidence: {confidence}% — This email looks safe</div>
-            </div>""", unsafe_allow_html=True)
+            <h3>🚫 Spam Email</h3>
+            <p>This email appears to be spam.</p>
+            <b>Confidence : {confidence}%</b>
+            </div>
+            """,unsafe_allow_html=True)
 
-# ── FOOTER ──
-st.markdown("""
-<div class="footer">
-    © 2026 Shreya Shukla &nbsp;|&nbsp; Email Spam Detector &nbsp;|&nbsp; ML Project
+        else:
+
+            confidence=round(probability[0]*100,2)
+
+            st.markdown(f"""
+            <div class="result-safe">
+            <h3>✅ Legitimate Email</h3>
+            <p>This email appears to be safe.</p>
+            <b>Confidence : {confidence}%</b>
+            </div>
+            """,unsafe_allow_html=True)
+
+st.markdown("</div>",unsafe_allow_html=True)
+
+st.markdown(
+"""
+<div class='footer'>
+Developed by <b>Shreya Shukla</b><br>
+Email Spam Detector • Machine Learning Project • 2026
 </div>
-""", unsafe_allow_html=True)
+""",
+unsafe_allow_html=True
+)
